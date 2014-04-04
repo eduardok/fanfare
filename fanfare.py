@@ -1,8 +1,8 @@
 """
 Module that contains the basic implementation of the Fanfare daemon.
 """
-import logging
 import logging.handlers
+import os
 import sys
 import time
 
@@ -10,6 +10,7 @@ import sensors
 
 
 class FanfareDaemon(object):
+
     """
     Basic fanfare daemon functionality:
 
@@ -17,13 +18,14 @@ class FanfareDaemon(object):
     * If the temperature exceeds a treshold, set fan speed to 'full-speed'
     * If the temperature comes below the treshold, set fan speed to 'auto'
     """
+
     def __init__(self):
         self.log = logging.getLogger("fanfare")
         self.log.setLevel(logging.INFO)
         formatter = logging.Formatter(fmt='[%(name)s] %(message)s')
         handler = logging.handlers.SysLogHandler(
-                         facility=logging.handlers.SysLogHandler.LOG_DAEMON,
-                         address="/dev/log")
+            facility=logging.handlers.SysLogHandler.LOG_DAEMON,
+            address="/dev/log")
         handler.setFormatter(formatter)
         handler.setLevel(logging.INFO)
         self.log.addHandler(handler)
@@ -31,6 +33,12 @@ class FanfareDaemon(object):
         self.temp_treshold = 75
         self.poll_time = 30
         self.fan_control_device = '/proc/acpi/ibm/fan'
+        if os.getuid() != 0:
+            self.log.error('This program must run as root, as it needs access '
+                           'to the fan control device %s. Exiting...',
+                           self.fan_control_device)
+            sys.exit(2)
+
         self.target_label = 'Physical id 0'
         self.full_speed_on = False
 
@@ -82,4 +90,3 @@ class FanfareDaemon(object):
                 self.log.error("Daemon is shutting down...")
                 sensors.cleanup()
                 sys.exit(1)
-

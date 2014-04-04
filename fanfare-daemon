@@ -1,14 +1,9 @@
 #!/usr/bin/env python
 
 import os
+import logging
 from fanfare import FanfareDaemon
 
 if __name__ == '__main__':
-    if os.getuid() != 0:
-        logger.error('This program must run as root, as it needs access '
-                     'to the fan control device %s. Exiting...',
-                     FAN_CONTROL_DEVICE)
-        sys.exit(2)
-
     daemon = FanfareDaemon()
     daemon.run()
