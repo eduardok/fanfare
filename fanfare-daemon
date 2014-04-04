@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import os
-import logging
 from fanfare import FanfareDaemon
 
 if __name__ == '__main__':
